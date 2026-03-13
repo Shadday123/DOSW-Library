@@ -1,4 +1,4 @@
-package edu.eci.dosw.DOSW_Library.model;
+package edu.eci.dosw.DOSW_Library.core.model;
 
 
 import lombok.Data;
