@@ -5,6 +5,7 @@ import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,8 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Schema
 @Service
 public class BookService {
+    @Schema(hidden = true)
     private Map<String, Book> books;
 
     public BookService() {

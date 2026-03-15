@@ -5,6 +5,8 @@ import edu.eci.dosw.DOSW_Library.core.model.Loan;
 import edu.eci.dosw.DOSW_Library.core.service.LoanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,9 +21,9 @@ import java.util.stream.Collectors;
 /**
  * Controlador REST para gestión de préstamos
  */
+@Tag(name = "Controlador REST para gestión de préstamos", description = "Controlador REST para gestión de préstamos")
 @RestController
 @RequestMapping("/api/loans")
-@Tag(name = "Préstamos", description = "API para gestión de préstamos de libros")
 public class LoanController {
 
     @Autowired
@@ -30,9 +32,12 @@ public class LoanController {
     /**
      * Crea un nuevo préstamo
      */
+    @Parameters({
+            @Parameter(name = "userId", description = "", in = ParameterIn.QUERY, required = true),
+            @Parameter(name = "bookId", description = "", in = ParameterIn.QUERY, required = true)
+    })
+    @Operation(summary = "Crear nuevo préstamo", description = "Crea un préstamo de un libro a un usuario")
     @PostMapping
-    @Operation(summary = "Crear nuevo préstamo",
-            description = "Crea un préstamo de un libro a un usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Préstamo creado"),
             @ApiResponse(responseCode = "400", description = "Límite excedido o datos inválidos"),
@@ -52,9 +57,9 @@ public class LoanController {
     /**
      * Devuelve un libro prestado
      */
+    @Parameter(name = "loanId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Devolver libro", description = "Registra la devolución de un libro prestado")
     @PutMapping("/{loanId}/return")
-    @Operation(summary = "Devolver libro",
-            description = "Registra la devolución de un libro prestado")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Devolución registrada"),
             @ApiResponse(responseCode = "404", description = "Préstamo no encontrado"),
@@ -71,9 +76,9 @@ public class LoanController {
     /**
      * Obtiene un préstamo por ID
      */
+    @Parameter(name = "loanId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Obtener préstamo por ID", description = "Retorna los detalles de un préstamo específico")
     @GetMapping("/{loanId}")
-    @Operation(summary = "Obtener préstamo por ID",
-            description = "Retorna los detalles de un préstamo específico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Préstamo encontrado"),
             @ApiResponse(responseCode = "404", description = "Préstamo no encontrado"),
@@ -89,9 +94,8 @@ public class LoanController {
     /**
      * Obtiene todos los préstamos
      */
+    @Operation(summary = "Obtener todos los préstamos", description = "Retorna una lista de todos los préstamos del sistema")
     @GetMapping
-    @Operation(summary = "Obtener todos los préstamos",
-            description = "Retorna una lista de todos los préstamos del sistema")
     @ApiResponse(responseCode = "200", description = "Lista de préstamos obtenida")
     public ResponseEntity<List<LoanDTO>> getAllLoans() {
         List<Loan> loans = loanService.getAllLoans();
@@ -104,9 +108,9 @@ public class LoanController {
     /**
      * Obtiene préstamos activos de un usuario
      */
+    @Parameter(name = "userId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Obtener préstamos activos", description = "Retorna los préstamos pendientes de un usuario")
     @GetMapping("/user/{userId}/active")
-    @Operation(summary = "Obtener préstamos activos",
-            description = "Retorna los préstamos pendientes de un usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Préstamos obtenidos"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
@@ -125,9 +129,9 @@ public class LoanController {
     /**
      * Obtiene todos los préstamos de un usuario
      */
+    @Parameter(name = "userId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Obtener historial de usuario", description = "Retorna todos los préstamos de un usuario")
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Obtener historial de usuario",
-            description = "Retorna todos los préstamos de un usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Historial obtenido"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
@@ -144,9 +148,9 @@ public class LoanController {
     }
 
 
+    @Parameter(name = "bookId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Obtener préstamos de libro", description = "Retorna todos los préstamos de un libro")
     @GetMapping("/book/{bookId}")
-    @Operation(summary = "Obtener préstamos de libro",
-            description = "Retorna todos los préstamos de un libro")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Préstamos obtenidos"),
             @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
@@ -163,9 +167,8 @@ public class LoanController {
     }
 
 
+    @Operation(summary = "Obtener préstamos vencidos", description = "Retorna todos los préstamos no devueltos a tiempo")
     @GetMapping("/overdue")
-    @Operation(summary = "Obtener préstamos vencidos",
-            description = "Retorna todos los préstamos no devueltos a tiempo")
     @ApiResponse(responseCode = "200", description = "Préstamos vencidos obtenidos")
     public ResponseEntity<List<LoanDTO>> getOverdueLoans() {
         List<Loan> loans = loanService.getOverdueLoans();
@@ -176,9 +179,9 @@ public class LoanController {
     }
 
 
+    @Parameter(name = "userId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Obtener préstamos vencidos de usuario", description = "Retorna los préstamos vencidos de un usuario")
     @GetMapping("/user/{userId}/overdue")
-    @Operation(summary = "Obtener préstamos vencidos de usuario",
-            description = "Retorna los préstamos vencidos de un usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Préstamos vencidos obtenidos"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
@@ -195,9 +198,9 @@ public class LoanController {
     }
 
 
+    @Parameter(name = "loanId", description = "", in = ParameterIn.PATH, required = true)
+    @Operation(summary = "Calcular multa", description = "Calcula la multa (1000 pesos/día) por atraso")
     @GetMapping("/{loanId}/fine")
-    @Operation(summary = "Calcular multa",
-            description = "Calcula la multa (1000 pesos/día) por atraso")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Multa calculada"),
             @ApiResponse(responseCode = "404", description = "Préstamo no encontrado"),
@@ -211,9 +214,12 @@ public class LoanController {
     }
 
 
+    @Parameters({
+            @Parameter(name = "loanId", description = "", in = ParameterIn.PATH, required = true),
+            @Parameter(name = "additionalDays", description = "", in = ParameterIn.QUERY, required = true)
+    })
+    @Operation(summary = "Renovar préstamo", description = "Extiende la fecha de devolución")
     @PutMapping("/{loanId}/renew")
-    @Operation(summary = "Renovar préstamo",
-            description = "Extiende la fecha de devolución")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Préstamo renovado"),
             @ApiResponse(responseCode = "404", description = "Préstamo no encontrado"),
@@ -230,18 +236,16 @@ public class LoanController {
     }
 
 
+    @Operation(summary = "Total de préstamos activos", description = "Retorna el número de préstamos pendientes")
     @GetMapping("/stats/active")
-    @Operation(summary = "Total de préstamos activos",
-            description = "Retorna el número de préstamos pendientes")
     @ApiResponse(responseCode = "200", description = "Total obtenido")
     public ResponseEntity<Integer> getTotalActiveLoans() {
         return ResponseEntity.ok(loanService.getTotalActiveLoans());
     }
 
 
+    @Operation(summary = "Total de préstamos completados", description = "Retorna el número de préstamos devueltos")
     @GetMapping("/stats/completed")
-    @Operation(summary = "Total de préstamos completados",
-            description = "Retorna el número de préstamos devueltos")
     @ApiResponse(responseCode = "200", description = "Total obtenido")
     public ResponseEntity<Integer> getTotalCompletedLoans() {
         return ResponseEntity.ok(loanService.getTotalCompletedLoans());
