@@ -1,15 +1,11 @@
 
 package edu.eci.dosw.DOSW_Library.core.service;
-
-import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
-import edu.eci.dosw.DOSW_Library.core.exception.LoanLimitExceededException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.model.Loan;
 import edu.eci.dosw.DOSW_Library.core.model.User;
 import edu.eci.dosw.DOSW_Library.core.util.DateUtil;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,14 +16,12 @@ import java.util.List;
 public class LoanService {
 
     private static final int LOAN_DURATION_DAYS = 14;
-    private static final int MAX_ACTIVE_LOANS = 5;
+    static final int MAX_ACTIVE_LOANS = 5;
 
     private List<Loan> loans;
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private BookService bookService;
 
     public LoanService() {
@@ -40,10 +34,6 @@ public class LoanService {
 
         User user = userService.getUserById(userId);
         Book book = bookService.getBookById(bookId);
-
-        long activeLoans = loans.stream()
-                .filter(loan -> loan.getUser().getId().equals(userId) && loan.isStatus())
-                .count();
 
 
         Loan loan = new Loan();
