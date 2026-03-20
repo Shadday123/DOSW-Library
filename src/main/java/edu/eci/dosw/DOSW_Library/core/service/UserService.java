@@ -1,4 +1,3 @@
-
 package edu.eci.dosw.DOSW_Library.core.service;
 
 import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
@@ -12,6 +11,7 @@ import java.util.List;
 
 @Service
 public class UserService {
+
     private List<User> users;
 
     public UserService() {
@@ -33,16 +33,16 @@ public class UserService {
         return new ArrayList<>(users);
     }
 
-    public User getUserById(String userId) throws Exception {
+    public User getUserById(String userId) {
         ValidationUtil.validateNotEmpty(userId, "ID del usuario");
 
         return users.stream()
                 .filter(user -> user.getId().equals(userId))
                 .findFirst()
-                .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException(userId, true));
     }
 
-    public User updateUser(String userId, String newName) throws Exception {
+    public User updateUser(String userId, String newName) {
         ValidationUtil.validateNotEmpty(userId, "ID del usuario");
         ValidationUtil.validateNotEmpty(newName, "Nuevo nombre");
 

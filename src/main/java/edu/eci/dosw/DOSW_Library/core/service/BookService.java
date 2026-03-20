@@ -1,11 +1,9 @@
-
 package edu.eci.dosw.DOSW_Library.core.service;
 
 import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,10 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Schema
 @Service
 public class BookService {
-    @Schema(hidden = true)
+
     private Map<String, Book> books;
 
     public BookService() {
@@ -50,6 +47,9 @@ public class BookService {
         ValidationUtil.validateNotEmpty(bookId, "ID del libro");
 
         Book book = books.get(bookId);
+        if (book == null) {
+            throw new IllegalArgumentException("Libro no encontrado con ID: " + bookId);
+        }
         return book;
     }
 
@@ -90,6 +90,11 @@ public class BookService {
 
     public void decreaseAvailableCopies(String bookId) {
         Book book = getBookById(bookId);
+
+        if (book.getAvailableCopies() <= 0) {
+            throw new BookNotAvailableException(bookId, book.getTitle());
+        }
+
         book.setAvailableCopies(book.getAvailableCopies() - 1);
     }
 
@@ -97,7 +102,8 @@ public class BookService {
         Book book = getBookById(bookId);
 
         if (book.getAvailableCopies() >= book.getTotalCopies()) {
-            throw new IllegalArgumentException("No se pueden aumentar más copias, ya está en el máximo");
+            throw new IllegalArgumentException(
+                    "No se pueden aumentar más copias: el libro '" + book.getTitle() + "' ya está en el máximo");
         }
 
         book.setAvailableCopies(book.getAvailableCopies() + 1);
@@ -126,4 +132,3 @@ public class BookService {
                 .sum();
     }
 }
-

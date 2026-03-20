@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controlador REST para gestión de usuarios
- */
+
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "Usuarios", description = "API para gestión de usuarios de la biblioteca")

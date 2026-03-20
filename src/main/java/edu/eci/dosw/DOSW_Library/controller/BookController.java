@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,22 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controlador REST para gestión de libros
- */
 @RestController
 @RequestMapping("/api/books")
 @Tag(name = "Libros", description = "API para gestión de libros de la biblioteca")
 public class BookController {
 
+    @Autowired
     private BookService bookService;
 
-    /**
-     * Agrega un nuevo libro al sistema
-     */
     @PostMapping
-    @Operation(summary = "Agregar nuevo libro",
-            description = "Crea un nuevo libro en el sistema")
+    @Operation(summary = "Agregar nuevo libro", description = "Crea un nuevo libro en el sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Libro agregado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Error en los datos"),
@@ -41,12 +36,8 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.CREATED).body(BookDTO.modelToDTO(book));
     }
 
-    /**
-     * Obtiene todos los libros
-     */
     @GetMapping
-    @Operation(summary = "Obtener todos los libros",
-            description = "Retorna una lista de todos los libros disponibles")
+    @Operation(summary = "Obtener todos los libros", description = "Retorna una lista de todos los libros disponibles")
     @ApiResponse(responseCode = "200", description = "Lista de libros obtenida")
     public ResponseEntity<List<BookDTO>> getAllBooks() {
         List<Book> books = bookService.getAllBooks();
@@ -56,12 +47,8 @@ public class BookController {
         return ResponseEntity.ok(bookDTOs);
     }
 
-    /**
-     * Obtiene un libro por su ID
-     */
     @GetMapping("/{bookId}")
-    @Operation(summary = "Obtener libro por ID",
-            description = "Retorna los detalles de un libro específico")
+    @Operation(summary = "Obtener libro por ID", description = "Retorna los detalles de un libro específico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Libro encontrado"),
             @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
@@ -74,12 +61,8 @@ public class BookController {
         return ResponseEntity.ok(BookDTO.modelToDTO(book));
     }
 
-    /**
-     * Busca libros por título
-     */
     @GetMapping("/search/title")
-    @Operation(summary = "Buscar libros por título",
-            description = "Retorna libros que coincidan con el título buscado")
+    @Operation(summary = "Buscar libros por título", description = "Retorna libros que coincidan con el título buscado")
     @ApiResponse(responseCode = "200", description = "Búsqueda completada")
     public ResponseEntity<List<BookDTO>> getBooksByTitle(
             @Parameter(description = "Título o parte del título", required = true, example = "Quijote")
@@ -91,12 +74,8 @@ public class BookController {
         return ResponseEntity.ok(bookDTOs);
     }
 
-    /**
-     * Busca libros por autor
-     */
     @GetMapping("/search/author")
-    @Operation(summary = "Buscar libros por autor",
-            description = "Retorna libros del autor especificado")
+    @Operation(summary = "Buscar libros por autor", description = "Retorna libros del autor especificado")
     @ApiResponse(responseCode = "200", description = "Búsqueda completada")
     public ResponseEntity<List<BookDTO>> getBooksByAuthor(
             @Parameter(description = "Nombre del autor", required = true, example = "Cervantes")
@@ -108,12 +87,8 @@ public class BookController {
         return ResponseEntity.ok(bookDTOs);
     }
 
-    /**
-     * Verifica si un libro está disponible
-     */
     @GetMapping("/{bookId}/available")
-    @Operation(summary = "Verificar disponibilidad",
-            description = "Verifica si un libro tiene copias disponibles")
+    @Operation(summary = "Verificar disponibilidad", description = "Verifica si un libro tiene copias disponibles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Disponibilidad verificada"),
             @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
@@ -126,12 +101,8 @@ public class BookController {
         return ResponseEntity.ok(isAvailable);
     }
 
-    /**
-     * Actualiza la disponibilidad de un libro
-     */
     @PutMapping("/{bookId}/availability")
-    @Operation(summary = "Actualizar disponibilidad",
-            description = "Actualiza el número de copias disponibles")
+    @Operation(summary = "Actualizar disponibilidad", description = "Actualiza el número de copias disponibles")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Disponibilidad actualizada"),
             @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
@@ -148,8 +119,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{bookId}")
-    @Operation(summary = "Eliminar libro",
-            description = "Elimina un libro de la biblioteca")
+    @Operation(summary = "Eliminar libro", description = "Elimina un libro de la biblioteca")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Libro eliminado"),
             @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
@@ -162,19 +132,15 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/stats/total")
-    @Operation(summary = "Obtener total de libros",
-            description = "Retorna el número total de libros únicos")
+    @Operation(summary = "Obtener total de libros", description = "Retorna el número total de libros únicos")
     @ApiResponse(responseCode = "200", description = "Total obtenido")
     public ResponseEntity<Integer> getTotalBooks() {
         return ResponseEntity.ok(bookService.getTotalBooks());
     }
 
-
     @GetMapping("/stats/available")
-    @Operation(summary = "Obtener copias disponibles",
-            description = "Retorna el total de copias disponibles")
+    @Operation(summary = "Obtener copias disponibles", description = "Retorna el total de copias disponibles")
     @ApiResponse(responseCode = "200", description = "Total obtenido")
     public ResponseEntity<Integer> getTotalAvailableCopies() {
         return ResponseEntity.ok(bookService.getTotalAvailableCopies());
