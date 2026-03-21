@@ -67,46 +67,6 @@ public class BookController {
         return ResponseEntity.ok(BookDTO.modelToDTO(book));
     }
 
-    @GetMapping("/search/title")
-    @Operation(summary = "Buscar libros por título", description = "Retorna libros que coincidan con el título buscado")
-    @ApiResponse(responseCode = "200", description = "Búsqueda completada")
-    public ResponseEntity<List<BookDTO>> getBooksByTitle(
-            @Parameter(description = "Título o parte del título", required = true, example = "Quijote")
-            @RequestParam String title) {
-        List<Book> books = bookService.getBooksByTitle(title);
-        List<BookDTO> bookDTOs = books.stream()
-                .map(BookDTO::modelToDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(bookDTOs);
-    }
-
-    @GetMapping("/search/author")
-    @Operation(summary = "Buscar libros por autor", description = "Retorna libros del autor especificado")
-    @ApiResponse(responseCode = "200", description = "Búsqueda completada")
-    public ResponseEntity<List<BookDTO>> getBooksByAuthor(
-            @Parameter(description = "Nombre del autor", required = true, example = "Cervantes")
-            @RequestParam String author) {
-        List<Book> books = bookService.getBooksByAuthor(author);
-        List<BookDTO> bookDTOs = books.stream()
-                .map(BookDTO::modelToDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(bookDTOs);
-    }
-
-    @GetMapping("/{bookId}/available")
-    @Operation(summary = "Verificar disponibilidad", description = "Verifica si un libro tiene copias disponibles")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Disponibilidad verificada"),
-            @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
-    public ResponseEntity<Boolean> isBookAvailable(
-            @Parameter(description = "ID del libro", required = true, example = "BK_xyz789")
-            @PathVariable String bookId) {
-        boolean isAvailable = bookService.isBookAvailable(bookId);
-        return ResponseEntity.ok(isAvailable);
-    }
-
     @PutMapping("/{bookId}/availability")
     @Operation(summary = "Actualizar disponibilidad", description = "Actualiza el número de copias disponibles")
     @ApiResponses(value = {
@@ -122,33 +82,5 @@ public class BookController {
             @RequestParam int availableCopies) {
         Book book = bookService.updateBookAvailability(bookId, availableCopies);
         return ResponseEntity.ok(BookDTO.modelToDTO(book));
-    }
-
-    @DeleteMapping("/{bookId}")
-    @Operation(summary = "Eliminar libro", description = "Elimina un libro de la biblioteca")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Libro eliminado"),
-            @ApiResponse(responseCode = "404", description = "Libro no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
-    public ResponseEntity<Void> deleteBook(
-            @Parameter(description = "ID del libro a eliminar", required = true, example = "BK_xyz789")
-            @PathVariable String bookId) {
-        bookService.deleteBook(bookId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/stats/total")
-    @Operation(summary = "Obtener total de libros", description = "Retorna el número total de libros únicos")
-    @ApiResponse(responseCode = "200", description = "Total obtenido")
-    public ResponseEntity<Integer> getTotalBooks() {
-        return ResponseEntity.ok(bookService.getTotalBooks());
-    }
-
-    @GetMapping("/stats/available")
-    @Operation(summary = "Obtener copias disponibles", description = "Retorna el total de copias disponibles")
-    @ApiResponse(responseCode = "200", description = "Total obtenido")
-    public ResponseEntity<Integer> getTotalAvailableCopies() {
-        return ResponseEntity.ok(bookService.getTotalAvailableCopies());
     }
 }

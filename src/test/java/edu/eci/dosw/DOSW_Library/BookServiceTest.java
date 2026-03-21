@@ -81,6 +81,7 @@ class BookServiceTest {
                 () -> bookService.addBook("El Quijote", "Cervantes", -1));
     }
 
+    // ==================== getAllBooks ====================
 
     @Test
     @DisplayName("getAllBooks: debe retornar lista vacía cuando no hay libros")
@@ -99,6 +100,8 @@ class BookServiceTest {
         List<Book> books = bookService.getAllBooks();
         assertEquals(2, books.size());
     }
+
+    // ==================== getBookById ====================
 
     @Test
     @DisplayName("getBookById: debe retornar el libro correcto")
@@ -125,55 +128,7 @@ class BookServiceTest {
                 () -> bookService.getBookById(""));
     }
 
-
-    @Test
-    @DisplayName("getBooksByTitle: debe encontrar libros por coincidencia parcial")
-    void getBooksByTitle_partialMatch_returnsBooks() {
-        bookService.addBook("El Quijote de la Mancha", "Cervantes", 2);
-        bookService.addBook("Cien años de soledad", "García Márquez", 1);
-
-        List<Book> result = bookService.getBooksByTitle("quijote");
-        assertEquals(1, result.size());
-        assertEquals("El Quijote de la Mancha", result.get(0).getTitle());
-    }
-
-    @Test
-    @DisplayName("getBooksByTitle: debe ser insensible a mayúsculas")
-    void getBooksByTitle_caseInsensitive_returnsBooks() {
-        bookService.addBook("El Quijote", "Cervantes", 2);
-
-        List<Book> result = bookService.getBooksByTitle("QUIJOTE");
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    @DisplayName("getBooksByTitle: debe retornar lista vacía si no hay coincidencias")
-    void getBooksByTitle_noMatch_returnsEmpty() {
-        bookService.addBook("El Quijote", "Cervantes", 2);
-
-        List<Book> result = bookService.getBooksByTitle("Hamlet");
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    @DisplayName("getBooksByAuthor: debe encontrar libros por autor")
-    void getBooksByAuthor_found_returnsBooks() {
-        bookService.addBook("El Quijote", "Cervantes", 2);
-        bookService.addBook("Cien años de soledad", "García Márquez", 1);
-
-        List<Book> result = bookService.getBooksByAuthor("Cervantes");
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    @DisplayName("getBooksByAuthor: debe ser insensible a mayúsculas")
-    void getBooksByAuthor_caseInsensitive_returnsBooks() {
-        bookService.addBook("El Quijote", "Cervantes", 2);
-
-        List<Book> result = bookService.getBooksByAuthor("cervantes");
-        assertEquals(1, result.size());
-    }
-
+    // ==================== isBookAvailable ====================
 
     @Test
     @DisplayName("isBookAvailable: debe retornar true cuando hay copias")
@@ -191,6 +146,7 @@ class BookServiceTest {
         assertFalse(bookService.isBookAvailable(book.getId()));
     }
 
+    // ==================== decreaseAvailableCopies ====================
 
     @Test
     @DisplayName("decreaseAvailableCopies: debe reducir las copias en uno")
@@ -211,6 +167,7 @@ class BookServiceTest {
                 () -> bookService.decreaseAvailableCopies(book.getId()));
     }
 
+    // ==================== increaseAvailableCopies ====================
 
     @Test
     @DisplayName("increaseAvailableCopies: debe aumentar las copias en uno")
@@ -231,6 +188,7 @@ class BookServiceTest {
                 () -> bookService.increaseAvailableCopies(book.getId()));
     }
 
+    // ==================== updateBookAvailability ====================
 
     @Test
     @DisplayName("updateBookAvailability: debe actualizar las copias disponibles")
@@ -257,53 +215,5 @@ class BookServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> bookService.updateBookAvailability(book.getId(), -1));
-    }
-
-
-    @Test
-    @DisplayName("deleteBook: debe eliminar el libro y retornar true")
-    void deleteBook_exists_returnsTrue() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 2);
-        boolean deleted = bookService.deleteBook(book.getId());
-
-        assertTrue(deleted);
-        assertEquals(0, bookService.getTotalBooks());
-    }
-
-    @Test
-    @DisplayName("deleteBook: debe retornar false si el libro no existe")
-    void deleteBook_notFound_returnsFalse() {
-        boolean deleted = bookService.deleteBook("BK_inexistente");
-        assertFalse(deleted);
-    }
-
-
-    @Test
-    @DisplayName("getTotalBooks: debe contar correctamente los libros")
-    void getTotalBooks_returnsCorrectCount() {
-        assertEquals(0, bookService.getTotalBooks());
-
-        bookService.addBook("Libro A", "Autor A", 2);
-        bookService.addBook("Libro B", "Autor B", 1);
-
-        assertEquals(2, bookService.getTotalBooks());
-    }
-
-    @Test
-    @DisplayName("getTotalAvailableCopies: debe sumar correctamente todas las copias disponibles")
-    void getTotalAvailableCopies_returnsCorrectSum() {
-        bookService.addBook("Libro A", "Autor A", 3);
-        bookService.addBook("Libro B", "Autor B", 2);
-
-        assertEquals(5, bookService.getTotalAvailableCopies());
-    }
-
-    @Test
-    @DisplayName("getTotalAvailableCopies: debe actualizarse al prestar un libro")
-    void getTotalAvailableCopies_afterLoan_decreasesCorrectly() {
-        Book book = bookService.addBook("Libro A", "Autor A", 3);
-        bookService.decreaseAvailableCopies(book.getId());
-
-        assertEquals(2, bookService.getTotalAvailableCopies());
     }
 }

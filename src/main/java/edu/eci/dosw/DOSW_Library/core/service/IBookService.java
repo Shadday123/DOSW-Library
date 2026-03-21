@@ -12,10 +12,6 @@ public interface IBookService {
 
     Book getBookById(String bookId);
 
-    List<Book> getBooksByTitle(String title);
-
-    List<Book> getBooksByAuthor(String author);
-
     boolean isBookAvailable(String bookId);
 
     void decreaseAvailableCopies(String bookId);
@@ -23,10 +19,4 @@ public interface IBookService {
     void increaseAvailableCopies(String bookId);
 
     Book updateBookAvailability(String bookId, int newAvailableCopies);
-
-    boolean deleteBook(String bookId);
-
-    int getTotalBooks();
-
-    int getTotalAvailableCopies();
 }

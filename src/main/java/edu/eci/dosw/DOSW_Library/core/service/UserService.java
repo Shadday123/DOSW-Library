@@ -41,26 +41,4 @@ public class UserService implements IUserService {
                 .findFirst()
                 .orElseThrow(() -> new UserNotFoundException(userId, true));
     }
-
-    public User updateUser(String userId, String newName) {
-        ValidationUtil.validateNotEmpty(userId, "ID del usuario");
-        ValidationUtil.validateNotEmpty(newName, "Nuevo nombre");
-
-        User user = getUserById(userId);
-        user.setName(newName);
-        return user;
-    }
-
-    public boolean deleteUser(String userId) {
-        ValidationUtil.validateNotEmpty(userId, "ID del usuario");
-        return users.removeIf(user -> user.getId().equals(userId));
-    }
-
-    public boolean userExists(String userId) {
-        return users.stream().anyMatch(user -> user.getId().equals(userId));
-    }
-
-    public int getTotalUsers() {
-        return users.size();
-    }
 }

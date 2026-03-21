@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -100,98 +99,5 @@ public class LoanService implements ILoanService {
 
     public List<Loan> getAllLoans() {
         return new ArrayList<>(loans);
-    }
-
-    public List<Loan> getActiveLoansForUser(String userId) {
-        ValidationUtil.validateNotEmpty(userId, "ID del usuario");
-        userService.getUserById(userId);
-
-        List<Loan> result = new ArrayList<>();
-        loans.forEach(loan -> {
-            if (loan.getUser().getId().equals(userId) && loan.isStatus()) {
-                result.add(loan);
-            }
-        });
-        return result;
-    }
-
-    public List<Loan> getAllLoansForUser(String userId) {
-        ValidationUtil.validateNotEmpty(userId, "ID del usuario");
-        userService.getUserById(userId);
-
-        List<Loan> result = new ArrayList<>();
-        loans.forEach(loan -> {
-            if (loan.getUser().getId().equals(userId)) {
-                result.add(loan);
-            }
-        });
-        return result;
-    }
-
-    public List<Loan> getLoansForBook(String bookId) {
-        ValidationUtil.validateNotEmpty(bookId, "ID del libro");
-        bookService.getBookById(bookId);
-
-        List<Loan> result = new ArrayList<>();
-        loans.forEach(loan -> {
-            if (loan.getBook().getId().equals(bookId)) {
-                result.add(loan);
-            }
-        });
-        return result;
-    }
-
-    public List<Loan> getOverdueLoans() {
-        List<Loan> result = new ArrayList<>();
-        loans.forEach(loan -> {
-            if (loan.isStatus() && DateUtil.isOverdue(loan.getReturnDate())) {
-                result.add(loan);
-            }
-        });
-        return result;
-    }
-
-    public List<Loan> getOverdueLoansForUser(String userId) {
-        ValidationUtil.validateNotEmpty(userId, "ID del usuario");
-        userService.getUserById(userId);
-
-        List<Loan> result = new ArrayList<>();
-        loans.forEach(loan -> {
-            if (loan.getUser().getId().equals(userId) &&
-                    loan.isStatus() &&
-                    DateUtil.isOverdue(loan.getReturnDate())) {
-                result.add(loan);
-            }
-        });
-        return result;
-    }
-
-    public long calculateFine(String loanId) {
-        Loan loan = getLoanById(loanId);
-        long overdueDays = DateUtil.getOverdueDays(loan.getReturnDate());
-        return overdueDays * 1000;
-    }
-
-    public Loan renewLoan(String loanId, int additionalDays) {
-        Loan loan = getLoanById(loanId);
-
-        if (!loan.isStatus()) {
-            throw new IllegalArgumentException("No se puede renovar un préstamo que ya ha sido devuelto");
-        }
-        if (additionalDays <= 0) {
-            throw new IllegalArgumentException("El número de días adicionales debe ser positivo");
-        }
-
-        Date newReturnDate = DateUtil.addDays(loan.getReturnDate(), additionalDays);
-        loan.setReturnDate(newReturnDate);
-        return loan;
-    }
-
-    public int getTotalActiveLoans() {
-        return (int) loans.stream().filter(Loan::isStatus).count();
-    }
-
-    public int getTotalCompletedLoans() {
-        return (int) loans.stream().filter(loan -> !loan.isStatus()).count();
     }
 }

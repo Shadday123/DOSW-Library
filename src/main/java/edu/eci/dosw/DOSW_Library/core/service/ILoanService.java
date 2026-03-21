@@ -13,22 +13,4 @@ public interface ILoanService {
     Loan getLoanById(String loanId);
 
     List<Loan> getAllLoans();
-
-    List<Loan> getActiveLoansForUser(String userId);
-
-    List<Loan> getAllLoansForUser(String userId);
-
-    List<Loan> getLoansForBook(String bookId);
-
-    List<Loan> getOverdueLoans();
-
-    List<Loan> getOverdueLoansForUser(String userId);
-
-    long calculateFine(String loanId);
-
-    Loan renewLoan(String loanId, int additionalDays);
-
-    int getTotalActiveLoans();
-
-    int getTotalCompletedLoans();
 }

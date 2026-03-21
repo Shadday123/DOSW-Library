@@ -44,7 +44,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.modelToDTO(user));
     }
 
-
     @GetMapping
     @Operation(summary = "Obtener todos los usuarios",
             description = "Retorna una lista completa de todos los usuarios")
@@ -56,7 +55,6 @@ public class UserController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(userDTOs);
     }
-
 
     @GetMapping("/{userId}")
     @Operation(summary = "Obtener usuario por ID",
@@ -71,48 +69,5 @@ public class UserController {
             @PathVariable String userId) throws Exception {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(UserDTO.modelToDTO(user));
-    }
-
-
-    @PutMapping("/{userId}")
-    @Operation(summary = "Actualizar usuario",
-            description = "Actualiza la información de un usuario existente")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
-            @ApiResponse(responseCode = "400", description = "Error en los datos"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
-    public ResponseEntity<UserDTO> updateUser(
-            @Parameter(description = "ID del usuario a actualizar", required = true, example = "USR_abc123")
-            @PathVariable String userId,
-            @RequestBody UserDTO userDTO) throws Exception {
-        User user = userService.updateUser(userId, userDTO.getName());
-        return ResponseEntity.ok(UserDTO.modelToDTO(user));
-    }
-
-
-    @DeleteMapping("/{userId}")
-    @Operation(summary = "Eliminar usuario",
-            description = "Elimina un usuario del sistema")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Usuario eliminado exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
-    public ResponseEntity<Void> deleteUser(
-            @Parameter(description = "ID del usuario a eliminar", required = true, example = "USR_abc123")
-            @PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    @GetMapping("/stats/total")
-    @Operation(summary = "Obtener total de usuarios",
-            description = "Retorna el número total de usuarios registrados")
-    @ApiResponse(responseCode = "200", description = "Total de usuarios obtenido")
-    public ResponseEntity<Integer> getTotalUsers() {
-        return ResponseEntity.ok(userService.getTotalUsers());
     }
 }

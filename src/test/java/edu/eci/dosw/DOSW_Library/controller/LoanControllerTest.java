@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -90,39 +89,42 @@ class LoanControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/loans - Usuario no encontrado propaga excepción")
-    void createLoan_userNotFound_propagatesException() {
+    @DisplayName("POST /api/loans - Usuario no encontrado retorna 404")
+    void createLoan_userNotFound_returns404() throws Exception {
         when(loanService.createLoan("USR_inexistente", "BK_test01"))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/api/loans")
+        mockMvc.perform(post("/api/loans")
                         .param("userId", "USR_inexistente")
-                        .param("bookId", "BK_test01")));
+                        .param("bookId", "BK_test01"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Usuario no encontrado"));
     }
 
     @Test
-    @DisplayName("POST /api/loans - Libro no disponible propaga excepción")
-    void createLoan_bookNotAvailable_propagatesException() {
+    @DisplayName("POST /api/loans - Libro no disponible retorna 409")
+    void createLoan_bookNotAvailable_returns409() throws Exception {
         when(loanService.createLoan("USR_test01", "BK_test01"))
                 .thenThrow(new BookNotAvailableException("No hay copias disponibles"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/api/loans")
+        mockMvc.perform(post("/api/loans")
                         .param("userId", "USR_test01")
-                        .param("bookId", "BK_test01")));
+                        .param("bookId", "BK_test01"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("No hay copias disponibles"));
     }
 
     @Test
-    @DisplayName("POST /api/loans - Límite de préstamos excedido propaga excepción")
-    void createLoan_loanLimitExceeded_propagatesException() {
+    @DisplayName("POST /api/loans - Límite de préstamos excedido retorna 400")
+    void createLoan_loanLimitExceeded_returns400() throws Exception {
         when(loanService.createLoan("USR_test01", "BK_test01"))
                 .thenThrow(new LoanLimitExceededException("Límite de 5 préstamos alcanzado"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/api/loans")
+        mockMvc.perform(post("/api/loans")
                         .param("userId", "USR_test01")
-                        .param("bookId", "BK_test01")));
+                        .param("bookId", "BK_test01"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Límite de 5 préstamos alcanzado"));
     }
 
     // --- PUT /api/loans/{loanId}/return ---
@@ -143,23 +145,24 @@ class LoanControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/loans/{loanId}/return - Préstamo ya devuelto propaga excepción")
-    void returnLoan_alreadyReturned_propagatesException() {
+    @DisplayName("PUT /api/loans/{loanId}/return - Préstamo ya devuelto retorna 500")
+    void returnLoan_alreadyReturned_returns500() throws Exception {
         when(loanService.returnLoan("LN_test01"))
                 .thenThrow(new IllegalStateException("El préstamo ya fue devuelto"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(put("/api/loans/LN_test01/return")));
+        mockMvc.perform(put("/api/loans/LN_test01/return"))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
-    @DisplayName("PUT /api/loans/{loanId}/return - Préstamo no encontrado propaga excepción")
-    void returnLoan_notFound_propagatesException() {
+    @DisplayName("PUT /api/loans/{loanId}/return - Préstamo no encontrado retorna 400")
+    void returnLoan_notFound_returns400() throws Exception {
         when(loanService.returnLoan("LN_inexistente"))
                 .thenThrow(new IllegalArgumentException("Préstamo no encontrado"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(put("/api/loans/LN_inexistente/return")));
+        mockMvc.perform(put("/api/loans/LN_inexistente/return"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Préstamo no encontrado"));
     }
 
     // --- GET /api/loans/{loanId} ---
@@ -177,13 +180,14 @@ class LoanControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/loans/{loanId} - Préstamo no encontrado propaga excepción")
-    void getLoanById_notFound_propagatesException() {
+    @DisplayName("GET /api/loans/{loanId} - Préstamo no encontrado retorna 400")
+    void getLoanById_notFound_returns400() throws Exception {
         when(loanService.getLoanById("LN_inexistente"))
                 .thenThrow(new IllegalArgumentException("Préstamo no encontrado"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(get("/api/loans/LN_inexistente")));
+        mockMvc.perform(get("/api/loans/LN_inexistente"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Préstamo no encontrado"));
     }
 
     // --- GET /api/loans ---
@@ -207,200 +211,5 @@ class LoanControllerTest {
         mockMvc.perform(get("/api/loans"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    // --- GET /api/loans/user/{userId}/active ---
-
-    @Test
-    @DisplayName("GET /api/loans/user/{userId}/active - Retorna préstamos activos del usuario")
-    void getActiveLoansForUser_returnsList() throws Exception {
-        when(loanService.getActiveLoansForUser("USR_test01")).thenReturn(Arrays.asList(testLoan));
-
-        mockMvc.perform(get("/api/loans/user/USR_test01/active"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].status").value(true));
-    }
-
-    @Test
-    @DisplayName("GET /api/loans/user/{userId}/active - Usuario sin préstamos activos")
-    void getActiveLoansForUser_noActiveLoans_returnsEmpty() throws Exception {
-        when(loanService.getActiveLoansForUser("USR_test01")).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/loans/user/USR_test01/active"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    // --- GET /api/loans/user/{userId} ---
-
-    @Test
-    @DisplayName("GET /api/loans/user/{userId} - Retorna historial completo del usuario")
-    void getAllLoansForUser_returnsList() throws Exception {
-        Loan returnedLoan = new Loan();
-        returnedLoan.setId("LN_test02");
-        returnedLoan.setBook(testBook);
-        returnedLoan.setUser(testUser);
-        returnedLoan.setLoanDate(loanDate);
-        returnedLoan.setReturnDate(returnDate);
-        returnedLoan.setStatus(false);
-        returnedLoan.setActualReturnDate(new Date());
-
-        when(loanService.getAllLoansForUser("USR_test01"))
-                .thenReturn(Arrays.asList(testLoan, returnedLoan));
-
-        mockMvc.perform(get("/api/loans/user/USR_test01"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    // --- GET /api/loans/book/{bookId} ---
-
-    @Test
-    @DisplayName("GET /api/loans/book/{bookId} - Retorna préstamos del libro")
-    void getLoansForBook_returnsList() throws Exception {
-        when(loanService.getLoansForBook("BK_test01")).thenReturn(Arrays.asList(testLoan));
-
-        mockMvc.perform(get("/api/loans/book/BK_test01"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].bookId").value("BK_test01"));
-    }
-
-    // --- GET /api/loans/overdue ---
-
-    @Test
-    @DisplayName("GET /api/loans/overdue - Retorna préstamos vencidos")
-    void getOverdueLoans_returnsList() throws Exception {
-        Loan overdueLoan = new Loan();
-        overdueLoan.setId("LN_overdue01");
-        overdueLoan.setBook(testBook);
-        overdueLoan.setUser(testUser);
-        overdueLoan.setLoanDate(new Date(System.currentTimeMillis() - 20L * 24 * 60 * 60 * 1000));
-        overdueLoan.setReturnDate(new Date(System.currentTimeMillis() - 6L * 24 * 60 * 60 * 1000));
-        overdueLoan.setStatus(true);
-
-        when(loanService.getOverdueLoans()).thenReturn(Arrays.asList(overdueLoan));
-
-        mockMvc.perform(get("/api/loans/overdue"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value("LN_overdue01"));
-    }
-
-    @Test
-    @DisplayName("GET /api/loans/overdue - Sin préstamos vencidos retorna lista vacía")
-    void getOverdueLoans_none_returnsEmpty() throws Exception {
-        when(loanService.getOverdueLoans()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/loans/overdue"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    // --- GET /api/loans/user/{userId}/overdue ---
-
-    @Test
-    @DisplayName("GET /api/loans/user/{userId}/overdue - Retorna préstamos vencidos del usuario")
-    void getOverdueLoansForUser_returnsList() throws Exception {
-        when(loanService.getOverdueLoansForUser("USR_test01")).thenReturn(Arrays.asList(testLoan));
-
-        mockMvc.perform(get("/api/loans/user/USR_test01/overdue"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    // --- GET /api/loans/{loanId}/fine ---
-
-    @Test
-    @DisplayName("GET /api/loans/{loanId}/fine - Retorna multa calculada")
-    void calculateFine_overdueLoan_returnsFine() throws Exception {
-        when(loanService.calculateFine("LN_test01")).thenReturn(5000L);
-
-        mockMvc.perform(get("/api/loans/LN_test01/fine"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("5000"));
-    }
-
-    @Test
-    @DisplayName("GET /api/loans/{loanId}/fine - Préstamo al día retorna multa cero")
-    void calculateFine_notOverdue_returnsZero() throws Exception {
-        when(loanService.calculateFine("LN_test01")).thenReturn(0L);
-
-        mockMvc.perform(get("/api/loans/LN_test01/fine"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0"));
-    }
-
-    // --- PUT /api/loans/{loanId}/renew ---
-
-    @Test
-    @DisplayName("PUT /api/loans/{loanId}/renew - Renueva préstamo exitosamente con 200")
-    void renewLoan_success_returns200() throws Exception {
-        Date newReturnDate = new Date(returnDate.getTime() + 7L * 24 * 60 * 60 * 1000);
-        testLoan.setReturnDate(newReturnDate);
-        when(loanService.renewLoan("LN_test01", 7)).thenReturn(testLoan);
-
-        mockMvc.perform(put("/api/loans/LN_test01/renew")
-                        .param("additionalDays", "7"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("LN_test01"));
-
-        verify(loanService).renewLoan("LN_test01", 7);
-    }
-
-    @Test
-    @DisplayName("PUT /api/loans/{loanId}/renew - Préstamo ya devuelto propaga excepción")
-    void renewLoan_alreadyReturned_propagatesException() {
-        when(loanService.renewLoan("LN_test01", 7))
-                .thenThrow(new IllegalStateException("No se puede renovar un préstamo devuelto"));
-
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(put("/api/loans/LN_test01/renew")
-                        .param("additionalDays", "7")));
-    }
-
-    // --- GET /api/loans/stats/active ---
-
-    @Test
-    @DisplayName("GET /api/loans/stats/active - Retorna total de préstamos activos")
-    void getTotalActiveLoans_returnsCount() throws Exception {
-        when(loanService.getTotalActiveLoans()).thenReturn(3);
-
-        mockMvc.perform(get("/api/loans/stats/active"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("3"));
-    }
-
-    @Test
-    @DisplayName("GET /api/loans/stats/active - Sin préstamos activos retorna 0")
-    void getTotalActiveLoans_none_returnsZero() throws Exception {
-        when(loanService.getTotalActiveLoans()).thenReturn(0);
-
-        mockMvc.perform(get("/api/loans/stats/active"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0"));
-    }
-
-    // --- GET /api/loans/stats/completed ---
-
-    @Test
-    @DisplayName("GET /api/loans/stats/completed - Retorna total de préstamos completados")
-    void getTotalCompletedLoans_returnsCount() throws Exception {
-        when(loanService.getTotalCompletedLoans()).thenReturn(7);
-
-        mockMvc.perform(get("/api/loans/stats/completed"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("7"));
-    }
-
-    @Test
-    @DisplayName("GET /api/loans/stats/completed - Sin préstamos completados retorna 0")
-    void getTotalCompletedLoans_none_returnsZero() throws Exception {
-        when(loanService.getTotalCompletedLoans()).thenReturn(0);
-
-        mockMvc.perform(get("/api/loans/stats/completed"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0"));
     }
 }

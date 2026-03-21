@@ -17,8 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -67,31 +65,18 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/users - Nombre vacío propaga excepción del servicio")
-    void createUser_emptyName_propagatesException() throws Exception {
+    @DisplayName("POST /api/users - Nombre vacío retorna 400")
+    void createUser_emptyName_returns400() throws Exception {
         UserDTO emptyDTO = new UserDTO();
         emptyDTO.setName("");
         when(userService.registerUser(""))
                 .thenThrow(new IllegalArgumentException("El nombre no puede ser vacío"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyDTO))));
-    }
-
-    @Test
-    @DisplayName("POST /api/users - Nombre nulo propaga excepción del servicio")
-    void createUser_nullName_propagatesException() throws Exception {
-        UserDTO nullNameDTO = new UserDTO();
-        nullNameDTO.setName(null);
-        when(userService.registerUser(null))
-                .thenThrow(new IllegalArgumentException("El nombre no puede ser nulo"));
-
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(nullNameDTO))));
+                        .content(objectMapper.writeValueAsString(emptyDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("El nombre no puede ser vacío"));
     }
 
     // --- GET /api/users ---
@@ -148,96 +133,13 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/users/{userId} - Usuario no encontrado propaga excepción")
-    void getUserById_notFound_propagatesException() {
+    @DisplayName("GET /api/users/{userId} - Usuario no encontrado retorna 404")
+    void getUserById_notFound_returns404() throws Exception {
         when(userService.getUserById("USR_inexistente"))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado: USR_inexistente"));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(get("/api/users/USR_inexistente")));
-    }
-
-    // --- PUT /api/users/{userId} ---
-
-    @Test
-    @DisplayName("PUT /api/users/{userId} - Actualiza nombre de usuario con 200")
-    void updateUser_success_returns200() throws Exception {
-        User updatedUser = new User();
-        updatedUser.setId("USR_test01");
-        updatedUser.setName("Juan Actualizado");
-
-        UserDTO updateDTO = new UserDTO();
-        updateDTO.setName("Juan Actualizado");
-
-        when(userService.updateUser("USR_test01", "Juan Actualizado")).thenReturn(updatedUser);
-
-        mockMvc.perform(put("/api/users/USR_test01")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("USR_test01"))
-                .andExpect(jsonPath("$.name").value("Juan Actualizado"));
-
-        verify(userService).updateUser("USR_test01", "Juan Actualizado");
-    }
-
-    @Test
-    @DisplayName("PUT /api/users/{userId} - Usuario no encontrado propaga excepción")
-    void updateUser_notFound_propagatesException() throws Exception {
-        UserDTO updateDTO = new UserDTO();
-        updateDTO.setName("Nombre Nuevo");
-
-        when(userService.updateUser("USR_inexistente", "Nombre Nuevo"))
-                .thenThrow(new UserNotFoundException("Usuario no encontrado"));
-
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(put("/api/users/USR_inexistente")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDTO))));
-    }
-
-    // --- DELETE /api/users/{userId} ---
-
-    @Test
-    @DisplayName("DELETE /api/users/{userId} - Elimina usuario con 204")
-    void deleteUser_success_returns204() throws Exception {
-        when(userService.deleteUser("USR_test01")).thenReturn(true);
-
-        mockMvc.perform(delete("/api/users/USR_test01"))
-                .andExpect(status().isNoContent());
-
-        verify(userService).deleteUser("USR_test01");
-    }
-
-    @Test
-    @DisplayName("DELETE /api/users/{userId} - Usuario no encontrado propaga excepción")
-    void deleteUser_notFound_propagatesException() {
-        when(userService.deleteUser("USR_inexistente"))
-                .thenThrow(new UserNotFoundException("Usuario no encontrado"));
-
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(delete("/api/users/USR_inexistente")));
-    }
-
-    // --- GET /api/users/stats/total ---
-
-    @Test
-    @DisplayName("GET /api/users/stats/total - Retorna total de usuarios registrados")
-    void getTotalUsers_returnsCount() throws Exception {
-        when(userService.getTotalUsers()).thenReturn(10);
-
-        mockMvc.perform(get("/api/users/stats/total"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("10"));
-    }
-
-    @Test
-    @DisplayName("GET /api/users/stats/total - Sin usuarios retorna 0")
-    void getTotalUsers_noUsers_returnsZero() throws Exception {
-        when(userService.getTotalUsers()).thenReturn(0);
-
-        mockMvc.perform(get("/api/users/stats/total"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0"));
+        mockMvc.perform(get("/api/users/USR_inexistente"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Usuario no encontrado: USR_inexistente"));
     }
 }

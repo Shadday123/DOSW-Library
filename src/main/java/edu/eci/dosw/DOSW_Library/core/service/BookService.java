@@ -53,36 +53,6 @@ public class BookService implements IBookService {
         return book;
     }
 
-    public List<Book> getBooksByTitle(String title) {
-        ValidationUtil.validateNotEmpty(title, "Título del libro");
-
-        List<Book> result = new ArrayList<>();
-        String searchTerm = title.toLowerCase();
-
-        books.values().forEach(book -> {
-            if (book.getTitle().toLowerCase().contains(searchTerm)) {
-                result.add(book);
-            }
-        });
-
-        return result;
-    }
-
-    public List<Book> getBooksByAuthor(String author) {
-        ValidationUtil.validateNotEmpty(author, "Autor del libro");
-
-        List<Book> result = new ArrayList<>();
-        String searchTerm = author.toLowerCase();
-
-        books.values().forEach(book -> {
-            if (book.getAuthor().toLowerCase().contains(searchTerm)) {
-                result.add(book);
-            }
-        });
-
-        return result;
-    }
-
     public boolean isBookAvailable(String bookId) {
         Book book = getBookById(bookId);
         return book.getAvailableCopies() > 0;
@@ -115,20 +85,5 @@ public class BookService implements IBookService {
 
         book.setAvailableCopies(newAvailableCopies);
         return book;
-    }
-
-    public boolean deleteBook(String bookId) {
-        ValidationUtil.validateNotEmpty(bookId, "ID del libro");
-        return books.remove(bookId) != null;
-    }
-
-    public int getTotalBooks() {
-        return books.size();
-    }
-
-    public int getTotalAvailableCopies() {
-        return books.values().stream()
-                .mapToInt(Book::getAvailableCopies)
-                .sum();
     }
 }

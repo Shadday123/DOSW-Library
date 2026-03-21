@@ -11,12 +11,4 @@ public interface IUserService {
     List<User> getAllUsers();
 
     User getUserById(String userId);
-
-    User updateUser(String userId, String newName);
-
-    boolean deleteUser(String userId);
-
-    boolean userExists(String userId);
-
-    int getTotalUsers();
 }

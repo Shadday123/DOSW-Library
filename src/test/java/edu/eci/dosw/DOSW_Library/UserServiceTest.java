@@ -21,6 +21,7 @@ class UserServiceTest {
         userService = new UserService();
     }
 
+    // ==================== registerUser ====================
 
     @Test
     @DisplayName("registerUser: debe registrar un usuario exitosamente")
@@ -66,6 +67,7 @@ class UserServiceTest {
                 () -> userService.registerUser("   "));
     }
 
+    // ==================== getAllUsers ====================
 
     @Test
     @DisplayName("getAllUsers: debe retornar lista vacía cuando no hay usuarios")
@@ -86,16 +88,7 @@ class UserServiceTest {
         assertEquals(3, users.size());
     }
 
-    @Test
-    @DisplayName("getAllUsers: debe retornar una copia defensiva de la lista")
-    void getAllUsers_returnsDefensiveCopy() {
-        userService.registerUser("Usuario A");
-        List<User> users = userService.getAllUsers();
-        users.clear();
-
-        assertEquals(1, userService.getTotalUsers());
-    }
-
+    // ==================== getUserById ====================
 
     @Test
     @DisplayName("getUserById: debe retornar el usuario correcto")
@@ -130,103 +123,5 @@ class UserServiceTest {
     void getUserById_nullId_throwsException() {
         assertThrows(IllegalArgumentException.class,
                 () -> userService.getUserById(null));
-    }
-
-
-    @Test
-    @DisplayName("updateUser: debe actualizar el nombre del usuario exitosamente")
-    void updateUser_success() {
-        User user = userService.registerUser("Nombre Original");
-        User updated = userService.updateUser(user.getId(), "Nombre Actualizado");
-
-        assertEquals("Nombre Actualizado", updated.getName());
-        assertEquals(user.getId(), updated.getId());
-    }
-
-    @Test
-    @DisplayName("updateUser: debe lanzar UserNotFoundException si el usuario no existe")
-    void updateUser_notFound_throwsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class,
-                () -> userService.updateUser("USR_inexistente", "Nuevo Nombre"));
-    }
-
-    @Test
-    @DisplayName("updateUser: debe lanzar excepción si el nuevo nombre está vacío")
-    void updateUser_emptyName_throwsException() {
-        User user = userService.registerUser("Nombre Original");
-
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.updateUser(user.getId(), ""));
-    }
-
-    @Test
-    @DisplayName("updateUser: debe lanzar excepción si el ID es vacío")
-    void updateUser_emptyId_throwsException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.updateUser("", "Nuevo Nombre"));
-    }
-
-
-    @Test
-    @DisplayName("deleteUser: debe eliminar el usuario y retornar true")
-    void deleteUser_exists_returnsTrue() {
-        User user = userService.registerUser("Usuario a eliminar");
-        boolean deleted = userService.deleteUser(user.getId());
-
-        assertTrue(deleted);
-        assertEquals(0, userService.getTotalUsers());
-    }
-
-    @Test
-    @DisplayName("deleteUser: debe retornar false si el usuario no existe")
-    void deleteUser_notFound_returnsFalse() {
-        boolean deleted = userService.deleteUser("USR_inexistente");
-        assertFalse(deleted);
-    }
-
-    @Test
-    @DisplayName("deleteUser: debe lanzar excepción si el ID es vacío")
-    void deleteUser_emptyId_throwsException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.deleteUser(""));
-    }
-
-    @Test
-    @DisplayName("userExists: debe retornar true si el usuario existe")
-    void userExists_exists_returnsTrue() {
-        User user = userService.registerUser("Usuario Existente");
-        assertTrue(userService.userExists(user.getId()));
-    }
-
-    @Test
-    @DisplayName("userExists: debe retornar false si el usuario no existe")
-    void userExists_notFound_returnsFalse() {
-        assertFalse(userService.userExists("USR_inexistente"));
-    }
-
-
-    @Test
-    @DisplayName("getTotalUsers: debe retornar cero cuando no hay usuarios")
-    void getTotalUsers_empty_returnsZero() {
-        assertEquals(0, userService.getTotalUsers());
-    }
-
-    @Test
-    @DisplayName("getTotalUsers: debe contar correctamente los usuarios")
-    void getTotalUsers_withUsers_returnsCorrectCount() {
-        userService.registerUser("Usuario A");
-        userService.registerUser("Usuario B");
-
-        assertEquals(2, userService.getTotalUsers());
-    }
-
-    @Test
-    @DisplayName("getTotalUsers: debe decrementar después de eliminar un usuario")
-    void getTotalUsers_afterDelete_decrements() {
-        User user = userService.registerUser("Usuario A");
-        userService.registerUser("Usuario B");
-        userService.deleteUser(user.getId());
-
-        assertEquals(1, userService.getTotalUsers());
     }
 }
