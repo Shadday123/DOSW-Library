@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m markitdown \"C:/Users/crist/Downloads/DOSW 2 - S07 \\(5\\).pptx\")",
-      "Bash(pip install:*)",
-      "Bash(python -c \":*)"
-    ]
-  }
-}
