@@ -9,6 +9,7 @@ import edu.eci.dosw.DOSW_Library.core.util.DateUtil;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,21 +17,29 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class LoanService {
+public class LoanService implements ILoanService {
 
     private static final int LOAN_DURATION_DAYS = 14;
     public static final int MAX_ACTIVE_LOANS = 5;
 
     private List<Loan> loans;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private BookService bookService;
+    private IUserService userService;
+    private IBookService bookService;
 
     public LoanService() {
         this.loans = new ArrayList<>();
+    }
+
+    @Autowired
+    @Required
+    public void setUserService(IUserService userService) {
+        this.userService = userService;
+    }
+
+    @Autowired
+    @Required
+    public void setBookService(IBookService bookService) {
+        this.bookService = bookService;
     }
 
     public Loan createLoan(String userId, String bookId) {

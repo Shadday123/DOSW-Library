@@ -7,7 +7,7 @@ import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.model.Loan;
 import edu.eci.dosw.DOSW_Library.core.model.User;
-import edu.eci.dosw.DOSW_Library.core.service.LoanService;
+import edu.eci.dosw.DOSW_Library.core.service.ILoanService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class LoanControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private LoanService loanService;
+    private ILoanService loanService;
 
     @Autowired
     private ObjectMapper objectMapper;

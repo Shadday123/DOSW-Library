@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.eci.dosw.DOSW_Library.controller.dto.UserDTO;
 import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.model.User;
-import edu.eci.dosw.DOSW_Library.core.service.UserService;
+import edu.eci.dosw.DOSW_Library.core.service.IUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private IUserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;

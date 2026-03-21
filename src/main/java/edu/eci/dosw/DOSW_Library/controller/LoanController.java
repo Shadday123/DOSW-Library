@@ -2,7 +2,7 @@ package edu.eci.dosw.DOSW_Library.controller;
 
 import edu.eci.dosw.DOSW_Library.controller.dto.LoanDTO;
 import edu.eci.dosw.DOSW_Library.core.model.Loan;
-import edu.eci.dosw.DOSW_Library.core.service.LoanService;
+import edu.eci.dosw.DOSW_Library.core.service.ILoanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/loans")
 public class LoanController {
 
+    private ILoanService loanService;
+
     @Autowired
-    private LoanService loanService;
+    @Required
+    public void setLoanService(ILoanService loanService) {
+        this.loanService = loanService;
+    }
 
     /**
      * Crea un nuevo préstamo

@@ -2,13 +2,14 @@ package edu.eci.dosw.DOSW_Library.controller;
 
 import edu.eci.dosw.DOSW_Library.controller.dto.BookDTO;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
-import edu.eci.dosw.DOSW_Library.core.service.BookService;
+import edu.eci.dosw.DOSW_Library.core.service.IBookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,13 @@ import java.util.stream.Collectors;
 @Tag(name = "Libros", description = "API para gestión de libros de la biblioteca")
 public class BookController {
 
+    private IBookService bookService;
+
     @Autowired
-    private BookService bookService;
+    @Required
+    public void setBookService(IBookService bookService) {
+        this.bookService = bookService;
+    }
 
     @PostMapping
     @Operation(summary = "Agregar nuevo libro", description = "Crea un nuevo libro en el sistema")

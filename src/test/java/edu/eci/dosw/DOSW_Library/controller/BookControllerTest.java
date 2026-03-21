@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.eci.dosw.DOSW_Library.controller.dto.BookDTO;
 import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
-import edu.eci.dosw.DOSW_Library.core.service.BookService;
+import edu.eci.dosw.DOSW_Library.core.service.IBookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class BookControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private BookService bookService;
+    private IBookService bookService;
 
     @Autowired
     private ObjectMapper objectMapper;

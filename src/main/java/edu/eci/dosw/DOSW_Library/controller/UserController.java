@@ -2,13 +2,14 @@ package edu.eci.dosw.DOSW_Library.controller;
 
 import edu.eci.dosw.DOSW_Library.controller.dto.UserDTO;
 import edu.eci.dosw.DOSW_Library.core.model.User;
-import edu.eci.dosw.DOSW_Library.core.service.UserService;
+import edu.eci.dosw.DOSW_Library.core.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +23,13 @@ import java.util.stream.Collectors;
 @Tag(name = "Usuarios", description = "API para gestión de usuarios de la biblioteca")
 public class UserController {
 
+    private IUserService userService;
+
     @Autowired
-    private UserService userService;
+    @Required
+    public void setUserService(IUserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     @Operation(summary = "Registrar nuevo usuario",

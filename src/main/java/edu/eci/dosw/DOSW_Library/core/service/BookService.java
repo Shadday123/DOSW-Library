@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class BookService {
+public class BookService implements IBookService {
 
     private Map<String, Book> books;
 

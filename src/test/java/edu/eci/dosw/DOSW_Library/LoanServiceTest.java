@@ -6,9 +6,9 @@ import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.model.Loan;
 import edu.eci.dosw.DOSW_Library.core.model.User;
-import edu.eci.dosw.DOSW_Library.core.service.BookService;
+import edu.eci.dosw.DOSW_Library.core.service.IBookService;
+import edu.eci.dosw.DOSW_Library.core.service.IUserService;
 import edu.eci.dosw.DOSW_Library.core.service.LoanService;
-import edu.eci.dosw.DOSW_Library.core.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,10 +30,10 @@ import static org.mockito.Mockito.*;
 class LoanServiceTest {
 
     @Mock
-    private UserService userService;
+    private IUserService userService;
 
     @Mock
-    private BookService bookService;
+    private IBookService bookService;
 
     @InjectMocks
     private LoanService loanService;
