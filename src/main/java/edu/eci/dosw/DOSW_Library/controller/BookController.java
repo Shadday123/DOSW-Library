@@ -31,7 +31,7 @@ public class BookController {
     }
 
     @PostMapping
-    @Operation(summary = "Agregar nuevo libro", description = "Crea un nuevo libro en el sistema")
+    @Operation(summary = "Agregar nuevoo libro", description = "Crea un nuevo libro en el sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Libro agregado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Error en los datos"),
