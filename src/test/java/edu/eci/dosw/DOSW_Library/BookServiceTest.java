@@ -3,22 +3,38 @@ package edu.eci.dosw.DOSW_Library;
 import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.service.BookService;
+import edu.eci.dosw.DOSW_Library.persistence.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("Pruebas unitarias de BookService")
 class BookServiceTest {
 
+    @Mock
+    private BookRepository bookRepository;
+
+    @InjectMocks
     private BookService bookService;
 
     @BeforeEach
     void setUp() {
-        bookService = new BookService();
+        // Mockito handles injection
     }
 
     // ==================== addBook ====================
@@ -26,6 +42,8 @@ class BookServiceTest {
     @Test
     @DisplayName("addBook: debe agregar un libro exitosamente")
     void addBook_success() {
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
         Book book = bookService.addBook("El Quijote", "Cervantes", 3);
 
         assertNotNull(book);
@@ -35,6 +53,7 @@ class BookServiceTest {
         assertEquals("Cervantes", book.getAuthor());
         assertEquals(3, book.getTotalCopies());
         assertEquals(3, book.getAvailableCopies());
+        verify(bookRepository).save(any(Book.class));
     }
 
     @Test
@@ -86,6 +105,8 @@ class BookServiceTest {
     @Test
     @DisplayName("getAllBooks: debe retornar lista vacía cuando no hay libros")
     void getAllBooks_empty_returnsEmptyList() {
+        when(bookRepository.findAll()).thenReturn(Collections.emptyList());
+
         List<Book> books = bookService.getAllBooks();
         assertNotNull(books);
         assertTrue(books.isEmpty());
@@ -94,8 +115,10 @@ class BookServiceTest {
     @Test
     @DisplayName("getAllBooks: debe retornar todos los libros agregados")
     void getAllBooks_withBooks_returnsAll() {
-        bookService.addBook("Libro A", "Autor A", 2);
-        bookService.addBook("Libro B", "Autor B", 1);
+        List<Book> mockBooks = new ArrayList<>();
+        mockBooks.add(new Book("Libro A", "Autor A", "BK_1", 2, 2));
+        mockBooks.add(new Book("Libro B", "Autor B", "BK_2", 1, 1));
+        when(bookRepository.findAll()).thenReturn(mockBooks);
 
         List<Book> books = bookService.getAllBooks();
         assertEquals(2, books.size());
@@ -106,17 +129,21 @@ class BookServiceTest {
     @Test
     @DisplayName("getBookById: debe retornar el libro correcto")
     void getBookById_exists_returnsBook() {
-        Book added = bookService.addBook("El Quijote", "Cervantes", 3);
-        Book found = bookService.getBookById(added.getId());
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 3, 3);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
+
+        Book found = bookService.getBookById("BK_test01");
 
         assertNotNull(found);
-        assertEquals(added.getId(), found.getId());
+        assertEquals("BK_test01", found.getId());
         assertEquals("El Quijote", found.getTitle());
     }
 
     @Test
     @DisplayName("getBookById: debe lanzar excepción si el libro no existe")
     void getBookById_notFound_throwsException() {
+        when(bookRepository.findById("BK_inexistente")).thenReturn(Optional.empty());
+
         assertThrows(IllegalArgumentException.class,
                 () -> bookService.getBookById("BK_inexistente"));
     }
@@ -133,17 +160,19 @@ class BookServiceTest {
     @Test
     @DisplayName("isBookAvailable: debe retornar true cuando hay copias")
     void isBookAvailable_withCopies_returnsTrue() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 2);
-        assertTrue(bookService.isBookAvailable(book.getId()));
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 2, 2);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
+
+        assertTrue(bookService.isBookAvailable("BK_test01"));
     }
 
     @Test
     @DisplayName("isBookAvailable: debe retornar false cuando no hay copias")
     void isBookAvailable_noCopies_returnsFalse() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 1);
-        bookService.decreaseAvailableCopies(book.getId());
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 0, 1);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
 
-        assertFalse(bookService.isBookAvailable(book.getId()));
+        assertFalse(bookService.isBookAvailable("BK_test01"));
     }
 
     // ==================== decreaseAvailableCopies ====================
@@ -151,20 +180,24 @@ class BookServiceTest {
     @Test
     @DisplayName("decreaseAvailableCopies: debe reducir las copias en uno")
     void decreaseAvailableCopies_success() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 3);
-        bookService.decreaseAvailableCopies(book.getId());
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 3, 3);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertEquals(2, bookService.getBookById(book.getId()).getAvailableCopies());
+        bookService.decreaseAvailableCopies("BK_test01");
+
+        assertEquals(2, mockBook.getAvailableCopies());
+        verify(bookRepository).save(mockBook);
     }
 
     @Test
     @DisplayName("decreaseAvailableCopies: debe lanzar excepción si no hay copias disponibles")
     void decreaseAvailableCopies_noCopies_throwsBookNotAvailableException() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 1);
-        bookService.decreaseAvailableCopies(book.getId());
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 0, 1);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
 
         assertThrows(BookNotAvailableException.class,
-                () -> bookService.decreaseAvailableCopies(book.getId()));
+                () -> bookService.decreaseAvailableCopies("BK_test01"));
     }
 
     // ==================== increaseAvailableCopies ====================
@@ -172,20 +205,24 @@ class BookServiceTest {
     @Test
     @DisplayName("increaseAvailableCopies: debe aumentar las copias en uno")
     void increaseAvailableCopies_success() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 3);
-        bookService.decreaseAvailableCopies(book.getId());
-        bookService.increaseAvailableCopies(book.getId());
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 2, 3);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertEquals(3, bookService.getBookById(book.getId()).getAvailableCopies());
+        bookService.increaseAvailableCopies("BK_test01");
+
+        assertEquals(3, mockBook.getAvailableCopies());
+        verify(bookRepository).save(mockBook);
     }
 
     @Test
     @DisplayName("increaseAvailableCopies: debe lanzar excepción si ya está en el máximo")
     void increaseAvailableCopies_atMax_throwsException() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 2);
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 2, 2);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
 
         assertThrows(IllegalArgumentException.class,
-                () -> bookService.increaseAvailableCopies(book.getId()));
+                () -> bookService.increaseAvailableCopies("BK_test01"));
     }
 
     // ==================== updateBookAvailability ====================
@@ -193,8 +230,11 @@ class BookServiceTest {
     @Test
     @DisplayName("updateBookAvailability: debe actualizar las copias disponibles")
     void updateBookAvailability_success() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 5);
-        Book updated = bookService.updateBookAvailability(book.getId(), 3);
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 5, 5);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Book updated = bookService.updateBookAvailability("BK_test01", 3);
 
         assertEquals(3, updated.getAvailableCopies());
     }
@@ -202,18 +242,20 @@ class BookServiceTest {
     @Test
     @DisplayName("updateBookAvailability: debe lanzar excepción si supera el total")
     void updateBookAvailability_exceedsTotal_throwsException() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 3);
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 3, 3);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
 
         assertThrows(IllegalArgumentException.class,
-                () -> bookService.updateBookAvailability(book.getId(), 5));
+                () -> bookService.updateBookAvailability("BK_test01", 5));
     }
 
     @Test
     @DisplayName("updateBookAvailability: debe lanzar excepción si es negativo")
     void updateBookAvailability_negative_throwsException() {
-        Book book = bookService.addBook("El Quijote", "Cervantes", 3);
+        Book mockBook = new Book("El Quijote", "Cervantes", "BK_test01", 3, 3);
+        when(bookRepository.findById("BK_test01")).thenReturn(Optional.of(mockBook));
 
         assertThrows(IllegalArgumentException.class,
-                () -> bookService.updateBookAvailability(book.getId(), -1));
+                () -> bookService.updateBookAvailability("BK_test01", -1));
     }
 }

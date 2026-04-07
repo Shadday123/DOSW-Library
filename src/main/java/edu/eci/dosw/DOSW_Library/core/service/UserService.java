@@ -4,18 +4,18 @@ import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.model.User;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
+import edu.eci.dosw.DOSW_Library.persistence.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class UserService implements IUserService {
 
-    private List<User> users;
+    private final UserRepository userRepository;
 
-    public UserService() {
-        this.users = new ArrayList<>();
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User registerUser(String name) {
@@ -25,20 +25,17 @@ public class UserService implements IUserService {
         user.setId(IdGeneratorUtil.generateUserId());
         user.setName(name);
 
-        users.add(user);
-        return user;
+        return userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+        return userRepository.findAll();
     }
 
     public User getUserById(String userId) {
         ValidationUtil.validateNotEmpty(userId, "ID del usuario");
 
-        return users.stream()
-                .filter(user -> user.getId().equals(userId))
-                .findFirst()
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId, true));
     }
 }

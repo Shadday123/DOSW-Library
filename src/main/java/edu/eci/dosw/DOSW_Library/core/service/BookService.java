@@ -4,20 +4,18 @@ import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.model.Book;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
+import edu.eci.dosw.DOSW_Library.persistence.BookRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class BookService implements IBookService {
 
-    private Map<String, Book> books;
+    private final BookRepository bookRepository;
 
-    public BookService() {
-        this.books = new HashMap<>();
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
     public Book addBook(String title, String author, int totalCopies) {
@@ -35,22 +33,18 @@ public class BookService implements IBookService {
         book.setTotalCopies(totalCopies);
         book.setAvailableCopies(totalCopies);
 
-        books.put(book.getId(), book);
-        return book;
+        return bookRepository.save(book);
     }
 
     public List<Book> getAllBooks() {
-        return new ArrayList<>(books.values());
+        return bookRepository.findAll();
     }
 
     public Book getBookById(String bookId) {
         ValidationUtil.validateNotEmpty(bookId, "ID del libro");
 
-        Book book = books.get(bookId);
-        if (book == null) {
-            throw new IllegalArgumentException("Libro no encontrado con ID: " + bookId);
-        }
-        return book;
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado con ID: " + bookId));
     }
 
     public boolean isBookAvailable(String bookId) {
@@ -66,6 +60,7 @@ public class BookService implements IBookService {
         }
 
         book.setAvailableCopies(book.getAvailableCopies() - 1);
+        bookRepository.save(book);
     }
 
     public void increaseAvailableCopies(String bookId) {
@@ -77,6 +72,7 @@ public class BookService implements IBookService {
         }
 
         book.setAvailableCopies(book.getAvailableCopies() + 1);
+        bookRepository.save(book);
     }
 
     public Book updateBookAvailability(String bookId, int newAvailableCopies) {
@@ -84,6 +80,6 @@ public class BookService implements IBookService {
         ValidationUtil.validateCopies(newAvailableCopies, book.getTotalCopies());
 
         book.setAvailableCopies(newAvailableCopies);
-        return book;
+        return bookRepository.save(book);
     }
 }

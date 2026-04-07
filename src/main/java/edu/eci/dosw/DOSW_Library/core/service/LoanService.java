@@ -8,11 +8,9 @@ import edu.eci.dosw.DOSW_Library.core.model.User;
 import edu.eci.dosw.DOSW_Library.core.util.DateUtil;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.util.ValidationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
+import edu.eci.dosw.DOSW_Library.persistence.LoanRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,23 +19,13 @@ public class LoanService implements ILoanService {
     private static final int LOAN_DURATION_DAYS = 14;
     public static final int MAX_ACTIVE_LOANS = 5;
 
-    private List<Loan> loans;
-    private IUserService userService;
-    private IBookService bookService;
+    private final LoanRepository loanRepository;
+    private final IUserService userService;
+    private final IBookService bookService;
 
-    public LoanService() {
-        this.loans = new ArrayList<>();
-    }
-
-    @Autowired
-    @Required
-    public void setUserService(IUserService userService) {
+    public LoanService(LoanRepository loanRepository, IUserService userService, IBookService bookService) {
+        this.loanRepository = loanRepository;
         this.userService = userService;
-    }
-
-    @Autowired
-    @Required
-    public void setBookService(IBookService bookService) {
         this.bookService = bookService;
     }
 
@@ -48,9 +36,7 @@ public class LoanService implements ILoanService {
         User user = userService.getUserById(userId);
         Book book = bookService.getBookById(bookId);
 
-        long activeLoansCount = loans.stream()
-                .filter(l -> l.getUser().getId().equals(userId) && l.isStatus())
-                .count();
+        long activeLoansCount = loanRepository.findActiveByUserId(userId).size();
         if (activeLoansCount >= MAX_ACTIVE_LOANS) {
             throw new LoanLimitExceededException(userId, MAX_ACTIVE_LOANS);
         }
@@ -68,8 +54,7 @@ public class LoanService implements ILoanService {
         loan.setStatus(true);
 
         bookService.decreaseAvailableCopies(bookId);
-        loans.add(loan);
-        return loan;
+        return loanRepository.save(loan);
     }
 
     public Loan returnLoan(String loanId) {
@@ -85,19 +70,17 @@ public class LoanService implements ILoanService {
         loan.setActualReturnDate(DateUtil.now());
 
         bookService.increaseAvailableCopies(loan.getBook().getId());
-        return loan;
+        return loanRepository.save(loan);
     }
 
     public Loan getLoanById(String loanId) {
         ValidationUtil.validateNotEmpty(loanId, "ID del préstamo");
 
-        return loans.stream()
-                .filter(loan -> loan.getId().equals(loanId))
-                .findFirst()
+        return loanRepository.findById(loanId)
                 .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado con ID: " + loanId));
     }
 
     public List<Loan> getAllLoans() {
-        return new ArrayList<>(loans);
+        return loanRepository.findAll();
     }
 }
