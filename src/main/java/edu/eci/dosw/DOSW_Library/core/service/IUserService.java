@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IUserService {
 
-    User registerUser(String name);
+    User registerUser(String name, String email, String password);
 
     List<User> getAllUsers();
 

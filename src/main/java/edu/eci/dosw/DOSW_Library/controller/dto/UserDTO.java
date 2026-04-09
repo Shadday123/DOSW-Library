@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class UserDTO {
     private String name;
     private String id;
+    private String email;
+    private String password;
 
     public static UserDTO modelToDTO(User user) {
         if (user == null) {
@@ -20,6 +22,7 @@ public class UserDTO {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setName(user.getName());
+        userDTO.setEmail(user.getEmail());
         return userDTO;
     }
 
@@ -30,6 +33,7 @@ public class UserDTO {
         User user = new User();
         user.setId(userDTO.getId());
         user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
         return user;
     }
 }

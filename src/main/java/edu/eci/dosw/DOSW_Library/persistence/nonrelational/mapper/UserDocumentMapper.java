@@ -12,6 +12,8 @@ public class UserDocumentMapper {
         UserDocument doc = new UserDocument();
         doc.setId(user.getId());
         doc.setName(user.getName());
+        doc.setEmail(user.getEmail());
+        doc.setPassword(user.getPassword());
         return doc;
     }
 
@@ -20,6 +22,8 @@ public class UserDocumentMapper {
         User user = new User();
         user.setId(doc.getId());
         user.setName(doc.getName());
+        user.setEmail(doc.getEmail());
+        user.setPassword(doc.getPassword());
         return user;
     }
 }

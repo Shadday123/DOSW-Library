@@ -12,6 +12,8 @@ public class UserEntityMapper {
         UserEntity entity = new UserEntity();
         entity.setId(user.getId());
         entity.setName(user.getName());
+        entity.setEmail(user.getEmail());
+        entity.setPassword(user.getPassword());
         return entity;
     }
 
@@ -20,6 +22,8 @@ public class UserEntityMapper {
         User user = new User();
         user.setId(entity.getId());
         user.setName(entity.getName());
+        user.setEmail(entity.getEmail());
+        user.setPassword(entity.getPassword());
         return user;
     }
 }

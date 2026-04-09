@@ -14,4 +14,6 @@ public class UserDocument {
     @Id
     private String id;
     private String name;
+    private String email;
+    private String password;
 }

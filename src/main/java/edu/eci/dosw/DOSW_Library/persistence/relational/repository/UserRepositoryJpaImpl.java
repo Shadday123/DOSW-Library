@@ -40,6 +40,11 @@ public class UserRepositoryJpaImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByEmail(String email) {
+        return repository.findByEmail(email).map(mapper::toDomain);
+    }
+
+    @Override
     public void delete(String id) {
         repository.deleteById(id);
     }

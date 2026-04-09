@@ -40,7 +40,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        User user = userService.registerUser(userDTO.getName());
+        User user = userService.registerUser(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.modelToDTO(user));
     }
 
